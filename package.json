@@ -6,15 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "make-admin": "npx tsx scripts/make-admin.ts"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "3.63.0",
+    "@payloadcms/email-nodemailer": "^3.63.0",
     "@payloadcms/next": "3.63.0",
     "@payloadcms/richtext-lexical": "3.63.0",
     "graphql": "^16.12.0",
-    "mongodb": "^7.0.0",
     "next": "16.0.1",
+    "nodemailer": "^7.0.10",
     "payload": "3.63.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -24,6 +26,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
