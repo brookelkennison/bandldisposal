@@ -5,6 +5,7 @@ const Users: CollectionConfig = {
   slug: 'users',
   labels: { singular: 'User', plural: 'Users' },
   admin: {
+    group: 'Settings',
     useAsTitle: 'email',
     defaultColumns: ['email', 'role', 'updatedAt'],
   },
@@ -28,7 +29,7 @@ const Users: CollectionConfig = {
       label: 'Role',
       type: 'select',
       required: true,
-      defaultValue: 'user',
+      defaultValue: 'admin',
       options: [
         { label: 'Admin', value: 'admin' },
         { label: 'Staff', value: 'staff' },

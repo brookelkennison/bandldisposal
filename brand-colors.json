@@ -1,0 +1,32 @@
+{
+  "brand": {
+    "primary": "#6ABF43",
+    "secondary": "#002F1F"
+  },
+  "buttons": {
+    "primary": {
+      "background": "#6ABF43",
+      "backgroundHover": "#5AA833",
+      "text": "#FFFFFF",
+      "border": "#6ABF43"
+    },
+    "secondary": {
+      "background": "#002F1F",
+      "backgroundHover": "#001A12",
+      "text": "#FFFFFF",
+      "border": "#002F1F"
+    },
+    "outline": {
+      "background": "transparent",
+      "backgroundHover": "#6ABF43",
+      "text": "#6ABF43",
+      "textHover": "#FFFFFF",
+      "border": "#6ABF43"
+    }
+  },
+  "backgrounds": {
+    "default": "#FFFFFF",
+    "clean": "#FFFFFF"
+  }
+}
+

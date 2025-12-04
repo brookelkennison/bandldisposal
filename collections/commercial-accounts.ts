@@ -1,16 +1,14 @@
 import type { CollectionConfig } from 'payload'
-import { syncAccountToStripe } from './accounts-stripe-sync'
 
-const Accounts: CollectionConfig = {
-  slug: 'accounts',
-  labels: { singular: 'Residential Account', plural: 'Residential Accounts' },
+const CommercialAccounts: CollectionConfig = {
+  slug: 'commercial-accounts',
+  labels: { singular: 'Commercial Account', plural: 'Commercial Accounts' },
   admin: {
     group: 'Accounts',
     useAsTitle: 'accountNumber',
     defaultColumns: [
       'accountNumber',
       'name',
-      'borough',
       'serviceInfo.serviceStatus',
       'serviceInfo.serviceStartDate',
       'billingInfo.nextBillingDate',
@@ -19,7 +17,7 @@ const Accounts: CollectionConfig = {
       'paymentInfo.latePaymentCount',
       'updatedAt',
     ],
-    description: 'Residential customer accounts with authentication, service, and billing information.',
+    description: 'Commercial customer accounts with authentication, service, and billing information.',
   },
   auth: {
     forgotPassword: {
@@ -50,7 +48,7 @@ const Accounts: CollectionConfig = {
               </div>
               <div class="content">
                 <p>Hello ${user.name || 'Valued Customer'},</p>
-                <p>Your account has been created! To complete your account setup, please set your password by clicking the button below:</p>
+                <p>Your commercial account has been created! To complete your account setup, please set your password by clicking the button below:</p>
                 <p style="text-align: center;">
                   <a href="${resetUrl}" class="button">Set Your Password</a>
                 </p>
@@ -68,10 +66,10 @@ const Accounts: CollectionConfig = {
         `;
       },
       generateEmailSubject: () => {
-        return 'Set Up Your B&L Disposal Account Password';
+        return 'Set Up Your B&L Disposal Commercial Account Password';
       },
     },
-  }, // Enables customer authentication via /api/accounts/login
+  }, // Enables customer authentication via /api/commercial-accounts/login
   access: {
     read: ({ req }) => {
       // Allow public read, or users can read their own account
@@ -86,7 +84,7 @@ const Accounts: CollectionConfig = {
     update: ({ req }) => {
       if (['admin', 'staff'].includes(req.user?.role)) return true
       // Customers can update their own account (but password changes are handled separately)
-      if (req.user?.collection === 'accounts') {
+      if (req.user?.collection === 'commercial-accounts') {
         return {
           id: { equals: req.user.id },
         }
@@ -98,18 +96,9 @@ const Accounts: CollectionConfig = {
   hooks: {
     beforeValidate: [
       async ({ data, req, operation }) => {
-        // Auto-generate account number if creating
-        if (operation === 'create' && data && typeof data === 'object' && !data.accountNumber) {
-          const count = await req.payload.count({
-            collection: 'accounts',
-          })
-          data.accountNumber = `ACC-${String(count.totalDocs + 1).padStart(6, '0')}`
-        }
-
-        // Completely remove password fields from **admin panel** operations
-        // Passwords are managed by customers through the frontend flows
-        const isAdminUser = req.user && ['admin', 'staff'].includes((req.user as any).role)
-        if (isAdminUser && data && typeof data === 'object') {
+        // Completely remove password fields from admin operations
+        // Passwords are managed entirely by customers through the frontend
+        if (data && typeof data === 'object') {
           if ('password' in data) {
             delete data.password
           }
@@ -122,18 +111,9 @@ const Accounts: CollectionConfig = {
     ],
     beforeChange: [
       async ({ data, req, operation }) => {
-        // Ensure account number is set (fallback if somehow not set in beforeValidate)
-        if (operation === 'create' && data && typeof data === 'object' && !data.accountNumber) {
-          const count = await req.payload.count({
-            collection: 'accounts',
-          })
-          data.accountNumber = `ACC-${String(count.totalDocs + 1).padStart(6, '0')}`
-        }
-
         // Prevent any password updates from admin side
         // Passwords can only be set/reset by customers
-        const isAdminUser = req.user && ['admin', 'staff'].includes((req.user as any).role)
-        if (isAdminUser && data && typeof data === 'object') {
+        if (data && typeof data === 'object') {
           if ('password' in data) {
             delete data.password
           }
@@ -195,38 +175,6 @@ const Accounts: CollectionConfig = {
           }
         }
 
-        // Sync pickup days from borough
-        if (data && typeof data === 'object' && data.borough) {
-          try {
-            // Handle different borough relationship formats
-            let boroughId: string | undefined
-            if (typeof data.borough === 'string') {
-              boroughId = data.borough
-            } else if (data.borough && typeof data.borough === 'object') {
-              boroughId = data.borough.id || (data.borough as any)._id
-            }
-            
-            if (boroughId) {
-              const borough = await req.payload.findByID({
-                collection: 'boroughs',
-                id: boroughId,
-              })
-              
-              if (borough && borough.routeDaysGroup?.routeDay) {
-                // Initialize serviceInfo if it doesn't exist
-                if (!data.serviceInfo) {
-                  data.serviceInfo = {}
-                }
-                // Set pickup days from borough route days
-                data.serviceInfo.pickupDays = borough.routeDaysGroup.routeDay
-              }
-            }
-          } catch (error) {
-            console.error('Error syncing pickup days from borough:', error)
-            // Don't throw - allow account creation even if borough sync fails
-          }
-        }
-
         // Check if account is late based on billing date and balance
         if (data && typeof data === 'object' && data.billingInfo && data.paymentInfo) {
           const billingInfo = data.billingInfo
@@ -260,14 +208,7 @@ const Accounts: CollectionConfig = {
           }
         }
 
-        // Sync account to Stripe (creates/updates Stripe customer)
-        const syncedData = await syncAccountToStripe({
-          data,
-          req,
-          operation,
-        })
-
-        return syncedData
+        return data
       },
     ],
     afterChange: [
@@ -276,18 +217,18 @@ const Accounts: CollectionConfig = {
         // This allows customers to set their own password
         if (operation === 'create' && doc.email) {
           try {
-            console.log('[Accounts Hook] Sending password setup email to:', doc.email);
+            console.log('[Commercial Accounts Hook] Sending password setup email to:', doc.email);
             // Use Payload's forgot password functionality to send setup email
             await req.payload.forgotPassword({
-              collection: 'accounts',
+              collection: 'commercial-accounts',
               data: {
                 email: doc.email,
               },
               req,
             })
-            console.log('[Accounts Hook] Password setup email sent successfully to:', doc.email);
+            console.log('[Commercial Accounts Hook] Password setup email sent successfully to:', doc.email);
           } catch (error) {
-            console.error('[Accounts Hook] Error sending password setup email:', error);
+            console.error('[Commercial Accounts Hook] Error sending password setup email:', error);
             // Don't throw - account creation should succeed even if email fails
           }
         }
@@ -299,38 +240,12 @@ const Accounts: CollectionConfig = {
     // They cannot be overridden, but hooks prevent password updates from admin
     // Passwords are managed entirely by customers through the frontend
     {
-      name: 'accountNumber',
-      label: 'Account Number',
-      type: 'text',
-      required: false,
-      unique: true,
-      index: true,
-      defaultValue: async ({ req }) => {
-        // Generate account number immediately when form loads
-        try {
-          const count = await req.payload.count({
-            collection: 'accounts',
-          })
-          return `ACC-${String(count.totalDocs + 1).padStart(6, '0')}`
-        } catch (error) {
-          // Fallback if count fails
-          return `ACC-${String(Date.now()).slice(-6).padStart(6, '0')}`
-        }
-      },
-      admin: {
-        description: 'Auto-generated account identifier',
-        readOnly: true,
-        width: '50%',
-      },
-    },
-    {
       name: 'name',
-      label: 'Name',
+      label: 'Business Name',
       type: 'text',
       required: true,
       admin: {
-        description: 'Customer name',
-        width: '50%',
+        description: 'Commercial business name',
       },
     },
     {
@@ -340,19 +255,19 @@ const Accounts: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description: 'Customer email address',
-        width: '50%',
+        description: 'Business email address',
       },
     },
     {
-      name: 'borough',
-      label: 'Borough',
-      type: 'relationship',
-      relationTo: 'boroughs',
+      name: 'accountNumber',
+      label: 'Account Number',
+      type: 'text',
       required: true,
+      unique: true,
+      index: true,
       admin: {
-        description: 'Select the borough for this residential account',
-        width: '50%',
+        description: 'Auto-generated account identifier',
+        readOnly: true,
       },
     },
     {
@@ -361,38 +276,17 @@ const Accounts: CollectionConfig = {
       type: 'text',
       admin: {
         description: 'Token used for account onboarding process',
-        width: '50%',
       },
     },
     {
-      name: 'paymentSetupReminderSent',
-      label: 'Payment Setup Reminder Sent',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description: 'Whether the 2-hour reminder email has been sent',
-        width: '50%',
-      },
-    },
-    {
-      name: 'paymentSetupReminderSentAt',
-      label: 'Payment Setup Reminder Sent At',
-      type: 'date',
-      admin: {
-        description: 'Date and time when the reminder email was sent',
-        width: '50%',
-      },
-    },
-    {
-      name: 'qbCustomerId',
-      label: 'QuickBooks Customer ID',
+      name: 'stripeCustomerId',
+      label: 'Stripe Customer ID',
       type: 'text',
       unique: true,
       index: true,
       admin: {
-        description: 'QuickBooks customer identifier (auto-synced)',
+        description: 'Stripe customer identifier (auto-synced)',
         readOnly: true,
-        width: '50%',
       },
     },
     {
@@ -405,8 +299,7 @@ const Accounts: CollectionConfig = {
           label: 'Phone',
           type: 'text',
           admin: {
-            description: 'Phone number',
-            width: '50%',
+            description: 'Business phone number',
           },
         },
         {
@@ -415,16 +308,12 @@ const Accounts: CollectionConfig = {
           type: 'text',
           admin: {
             description: 'Street address',
-            width: '100%',
           },
         },
         {
           name: 'city',
           label: 'City',
           type: 'text',
-          admin: {
-            width: '50%',
-          },
         },
         {
           name: 'state',
@@ -432,7 +321,6 @@ const Accounts: CollectionConfig = {
           type: 'text',
           admin: {
             description: 'State abbreviation (e.g., NY, CA)',
-            width: '25%',
           },
         },
         {
@@ -441,7 +329,6 @@ const Accounts: CollectionConfig = {
           type: 'text',
           admin: {
             description: 'ZIP or postal code',
-            width: '25%',
           },
           validate: (val: unknown) => {
             const zipStr = String(val ?? '').trim()
@@ -462,7 +349,6 @@ const Accounts: CollectionConfig = {
           required: true,
           admin: {
             description: 'Date when service began',
-            width: '50%',
           },
         },
         {
@@ -479,7 +365,6 @@ const Accounts: CollectionConfig = {
           ],
           admin: {
             description: 'Current status of the service',
-            width: '50%',
           },
         },
         {
@@ -487,11 +372,7 @@ const Accounts: CollectionConfig = {
           label: 'Pickup Days',
           type: 'select',
           hasMany: true,
-          admin: {
-            description: 'Automatically synced from selected borough route days',
-            readOnly: true,
-            width: '100%',
-          },
+          required: true,
           options: [
             { label: 'Monday', value: 'monday' },
             { label: 'Tuesday', value: 'tuesday' },
@@ -500,6 +381,9 @@ const Accounts: CollectionConfig = {
             { label: 'Friday', value: 'friday' },
             { label: 'Saturday', value: 'saturday' },
           ],
+          admin: {
+            description: 'Days of the week for trash pickup',
+          },
         },
         {
           name: 'serviceAddress',
@@ -513,17 +397,11 @@ const Accounts: CollectionConfig = {
               name: 'address',
               label: 'Address',
               type: 'text',
-              admin: {
-                width: '100%',
-              },
             },
             {
               name: 'city',
               label: 'City',
               type: 'text',
-              admin: {
-                width: '50%',
-              },
             },
             {
               name: 'state',
@@ -531,16 +409,12 @@ const Accounts: CollectionConfig = {
               type: 'text',
               admin: {
                 description: 'State abbreviation (e.g., NY, CA)',
-                width: '25%',
               },
             },
             {
               name: 'zip',
               label: 'ZIP Code',
               type: 'text',
-              admin: {
-                width: '25%',
-              },
             },
           ],
         },
@@ -560,7 +434,6 @@ const Accounts: CollectionConfig = {
           max: 31,
           admin: {
             description: 'Day of the month when billing occurs (1-31)',
-            width: '33%',
           },
         },
         {
@@ -578,7 +451,6 @@ const Accounts: CollectionConfig = {
           ],
           admin: {
             description: 'Frequency of billing',
-            width: '33%',
           },
         },
         {
@@ -588,7 +460,6 @@ const Accounts: CollectionConfig = {
           admin: {
             description: 'Calculated next billing date',
             readOnly: true,
-            width: '34%',
           },
         },
         {
@@ -598,7 +469,6 @@ const Accounts: CollectionConfig = {
           defaultValue: 0,
           admin: {
             description: 'Current outstanding balance (negative = credit)',
-            width: '50%',
           },
         },
       ],
@@ -608,17 +478,6 @@ const Accounts: CollectionConfig = {
       label: 'Payment Information',
       type: 'group',
       fields: [
-        {
-          name: 'invoices',
-          label: 'Invoices',
-          type: 'relationship',
-          relationTo: 'invoices',
-          hasMany: true,
-          admin: {
-            position: 'sidebar',
-            description: 'Invoices associated with this customer',
-          },
-        },
         {
           name: 'paymentMethod',
           label: 'Payment Method',
@@ -633,7 +492,22 @@ const Accounts: CollectionConfig = {
           ],
           admin: {
             description: 'Preferred payment method',
-            width: '50%',
+          },
+        },
+        {
+          name: 'lastPaymentDate',
+          label: 'Last Payment Date',
+          type: 'date',
+          admin: {
+            description: 'Date of last payment received',
+          },
+        },
+        {
+          name: 'lastPaymentAmount',
+          label: 'Last Payment Amount',
+          type: 'number',
+          admin: {
+            description: 'Amount of last payment',
           },
         },
         {
@@ -643,25 +517,6 @@ const Accounts: CollectionConfig = {
           defaultValue: false,
           admin: {
             description: 'Enable automatic payments',
-            width: '50%',
-          },
-        },
-        {
-          name: 'lastPaymentDate',
-          label: 'Last Payment Date',
-          type: 'date',
-          admin: {
-            description: 'Date of last payment received',
-            width: '33%',
-          },
-        },
-        {
-          name: 'lastPaymentAmount',
-          label: 'Last Payment Amount',
-          type: 'number',
-          admin: {
-            description: 'Amount of last payment',
-            width: '33%',
           },
         },
         {
@@ -676,7 +531,32 @@ const Accounts: CollectionConfig = {
           admin: {
             description: 'Automatically calculated based on billing date, balance, and grace period',
             readOnly: true,
-            width: '34%',
+          },
+        },
+        {
+          name: 'latePaymentCount',
+          label: 'Total Late Payments',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            description: 'Total number of late payments on record',
+          },
+        },
+        {
+          name: 'lastLatePaymentDate',
+          label: 'Last Late Payment Date',
+          type: 'date',
+          admin: {
+            description: 'Date of the most recent late payment',
+          },
+        },
+        {
+          name: 'totalLateFees',
+          label: 'Total Late Fees',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            description: 'Total late fees accrued (in dollars)',
           },
         },
         {
@@ -687,36 +567,6 @@ const Accounts: CollectionConfig = {
           min: 0,
           admin: {
             description: 'Number of days after due date before payment is considered late',
-            width: '33%',
-          },
-        },
-        {
-          name: 'latePaymentCount',
-          label: 'Total Late Payments',
-          type: 'number',
-          defaultValue: 0,
-          admin: {
-            description: 'Total number of late payments on record',
-            width: '33%',
-          },
-        },
-        {
-          name: 'lastLatePaymentDate',
-          label: 'Last Late Payment Date',
-          type: 'date',
-          admin: {
-            description: 'Date of the most recent late payment',
-            width: '34%',
-          },
-        },
-        {
-          name: 'totalLateFees',
-          label: 'Total Late Fees',
-          type: 'number',
-          defaultValue: 0,
-          admin: {
-            description: 'Total late fees accrued (in dollars)',
-            width: '50%',
           },
         },
         {
@@ -773,7 +623,6 @@ const Accounts: CollectionConfig = {
                 description: 'Additional notes about this late payment',
               },
             },
-            
           ],
         },
       ],
@@ -781,5 +630,5 @@ const Accounts: CollectionConfig = {
   ],
 }
 
-export default Accounts
+export default CommercialAccounts
 

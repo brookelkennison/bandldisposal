@@ -1,0 +1,267 @@
+{
+  "residential": {
+    "title": "Services for Home",
+    "baseUrl": "/residential",
+    "gridCols": 2,
+    "services": [
+      {
+        "icon": "trash",
+        "title": "Garbage Pickup",
+        "description": "Curbside Trash Pickup Service",
+        "href": "/residential/garbage"
+      },
+      {
+        "icon": "sofa",
+        "title": "Bulk Pick Up",
+        "description": "Furniture, home appliances, etc.",
+        "href": "/residential/bulk"
+      },
+      {
+        "icon": "hazard",
+        "title": "Household Hazardous Waste",
+        "description": "May require special handling",
+        "href": "/residential/hazardous"
+      },
+      {
+        "icon": "recycle",
+        "title": "Recycling",
+        "description": "Home Recycling Services",
+        "href": "/residential/recycling"
+      },
+      {
+        "icon": "leaf",
+        "title": "Yard Waste",
+        "description": "Eco-friendly Yard Disposal",
+        "href": "/residential/yard-waste"
+      },
+      {
+        "icon": "dumpster",
+        "title": "Roll Off Dumpster Rental",
+        "description": "Temporary and permanent",
+        "href": "/residential/dumpster"
+      },
+      {
+        "icon": "house",
+        "title": "All Residential Services",
+        "description": "See All",
+        "href": "/residential",
+        "fullWidth": true
+      }
+    ],
+    "moreInformation": {
+      "title": "More Information",
+      "links": [
+        {
+          "title": "Recycling Guide",
+          "description": "Sort and Recycle Tips",
+          "href": "/residential/recycling-guide"
+        },
+        {
+          "title": "Dumpster Sizes",
+          "description": "Containers",
+          "href": "/residential/dumpster-sizes"
+        }
+      ]
+    },
+    "utilityLinks": [
+      {
+        "icon": "credit-card",
+        "title": "Pay My Bill",
+        "href": "/pay-bill"
+      },
+      {
+        "icon": "hourglass",
+        "title": "Missed Pickup",
+        "href": "/missed-pickup"
+      },
+      {
+        "icon": "cone",
+        "title": "Broken Container",
+        "href": "/broken-container"
+      },
+      {
+        "icon": "clock",
+        "title": "Schedule",
+        "href": "/schedule"
+      },
+      {
+        "icon": "headset",
+        "title": "Customer Service",
+        "href": "/contact"
+      }
+    ]
+  },
+  "commercial": {
+    "title": "Services for Business",
+    "baseUrl": "/commercial",
+    "gridCols": 3,
+    "services": [
+      {
+        "icon": "dumpster",
+        "title": "Waste Collection",
+        "description": "Commercial Waste Management",
+        "href": "/commercial/waste-collection"
+      },
+      {
+        "icon": "recycle",
+        "title": "Commercial Recycling",
+        "description": "Recycling Solutions",
+        "href": "/commercial/recycling"
+      },
+      {
+        "icon": "dumpster",
+        "title": "Roll Off Dumpster Rental",
+        "description": "Temporary and permanent",
+        "href": "/commercial/dumpster-rental"
+      },
+      {
+        "icon": "compactor",
+        "title": "Compactors",
+        "description": "Effective Waste Disposal",
+        "href": "/commercial/compactors"
+      },
+      {
+        "icon": "sizes",
+        "title": "Dumpster Sizes",
+        "description": "Containers",
+        "href": "/commercial/dumpster-sizes"
+      },
+      {
+        "icon": "building",
+        "title": "All Commercial Services",
+        "description": "Recollection & Recycling Services",
+        "href": "/commercial"
+      }
+    ],
+    "utilityLinks": [
+      {
+        "icon": "credit-card",
+        "title": "Pay My Bill",
+        "href": "/pay-bill"
+      },
+      {
+        "icon": "hourglass",
+        "title": "Missed Pickup",
+        "href": "/missed-pickup"
+      },
+      {
+        "icon": "cone",
+        "title": "Broken Container",
+        "href": "/broken-container"
+      },
+      {
+        "icon": "clock",
+        "title": "Schedule",
+        "href": "/schedule"
+      },
+      {
+        "icon": "headset",
+        "title": "Customer Service",
+        "href": "/contact"
+      }
+    ]
+  },
+  "industrial": {
+    "title": "Industrial Services",
+    "baseUrl": "/industrial",
+    "gridCols": 2,
+    "services": [
+      {
+        "icon": "dumpster",
+        "title": "Roll Off Dumpster Rental",
+        "description": "Temporary and permanent",
+        "href": "/industrial/dumpster-rental"
+      },
+      {
+        "icon": "compactor",
+        "title": "Compactors",
+        "description": "Effective Waste Disposal",
+        "href": "/industrial/compactors"
+      }
+    ],
+    "utilityLinks": [
+      {
+        "icon": "credit-card",
+        "title": "Pay My Bill",
+        "href": "/pay-bill"
+      },
+      {
+        "icon": "hourglass",
+        "title": "Missed Pickup",
+        "href": "/missed-pickup"
+      },
+      {
+        "icon": "cone",
+        "title": "Broken Container",
+        "href": "/broken-container"
+      },
+      {
+        "icon": "clock",
+        "title": "Schedule",
+        "href": "/schedule"
+      },
+      {
+        "icon": "headset",
+        "title": "Customer Service",
+        "href": "/contact"
+      }
+    ]
+  },
+  "company": {
+    "title": "Company",
+    "baseUrl": "/company",
+    "gridCols": 2,
+    "services": [
+      {
+        "icon": "presentation",
+        "title": "About Us",
+        "description": "Over 30 Years of Trusted Waste Management",
+        "href": "/company/about"
+      },
+      {
+        "icon": "building",
+        "title": "Our Company",
+        "description": "Our Philosophy",
+        "href": "/company/philosophy"
+      }
+    ],
+    "moreInformation": {
+      "title": "More Info",
+      "links": [
+        {
+          "title": "Conshohocken Recycling & Rail Transfer",
+          "description": "(C&D) waste transfer station",
+          "href": "/company/transfer"
+        }
+      ]
+    },
+    "utilityLinks": [
+      {
+        "icon": "credit-card",
+        "title": "Pay My Bill",
+        "href": "/pay-bill"
+      },
+      {
+        "icon": "hourglass",
+        "title": "Missed Pickup",
+        "href": "/missed-pickup"
+      },
+      {
+        "icon": "cone",
+        "title": "Broken Container",
+        "href": "/broken-container"
+      },
+      {
+        "icon": "clock",
+        "title": "Schedule",
+        "href": "/schedule"
+      },
+      {
+        "icon": "headset",
+        "title": "Customer Service",
+        "href": "/contact"
+      }
+    ]
+  }
+}
+

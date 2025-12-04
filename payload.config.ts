@@ -1,10 +1,12 @@
-import { buildConfig } from 'payload'
+import { buildConfig, type GlobalConfig } from 'payload'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import nodemailer from 'nodemailer'
 import Accounts from './collections/accounts'
 import Boroughs from './collections/boroughs'
+import CommercialAccounts from './collections/commercial-accounts'
+import Invoices from './collections/invoices'
+import ResidentialBilling from './collections/residential-billing'
 import Users from './collections/users'
+
 
 if (!process.env.PAYLOAD_SECRET) {
   throw new Error('PAYLOAD_SECRET environment variable is required')
@@ -17,33 +19,34 @@ if (!process.env.DATABASE_URI) {
 const payloadSecret = process.env.PAYLOAD_SECRET!
 const databaseUri = process.env.DATABASE_URI!
 
-// Email configuration
-const emailAdapter = process.env.SMTP_HOST
-  ? nodemailerAdapter({
-      defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'noreply@example.com',
-      defaultFromName: process.env.SMTP_FROM_NAME || 'BandL Disposal',
-      transport: nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      }),
-    })
-  : undefined
+const QuickBooksAuth: GlobalConfig = {
+  slug: 'quickbooksAuth',
+  access: {
+    read: () => true,
+    update: () => true,
+  },
+  fields: [
+    { name: 'realmId', type: 'text' },
+    { name: 'accessToken', type: 'textarea' },
+    { name: 'refreshToken', type: 'textarea' },
+    { name: 'accessTokenExpiresAt', type: 'number' },
+    { name: 'refreshTokenExpiresAt', type: 'number' },
+  ],
+};
+
 
 export default buildConfig({
   secret: payloadSecret,
   db: mongooseAdapter({
     url: databaseUri,
   }),
-  email: emailAdapter,
   collections: [
     Users,
     {
       slug: 'pages',
+      admin: {
+        group: 'Content',
+      },
       fields: [
         {
           name: 'title',
@@ -53,5 +56,11 @@ export default buildConfig({
     },
     Boroughs,
     Accounts,
+    CommercialAccounts,
+    Invoices,
+    ResidentialBilling,
+  ],
+  globals: [
+    QuickBooksAuth,
   ],
 })
